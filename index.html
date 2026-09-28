@@ -1,1 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CK GAMING - Loot & Claim Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --neon-red: #ff0055;
+      --neon-cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --neon-gold: #ffd700;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 15px 90px 15px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Background Video Layer */
+    .bg-video-wrapper {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    .bg-video-wrapper video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(7, 9, 19, 0.84);
+      z-index: -1;
+      backdrop-filter: blur(4px);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 490px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Top Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 5px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 12px 6px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 119, 255, 0.4));
+      border-color: var(--neon-cyan);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .nav-btn:hover:not(.active) {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    /* Page Views */
+    .tab-page {
+      display: none;
+      animation: fadeInPage 0.35s ease forwards;
+    }
+
+    .tab-page.active-page {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    @keyframes fadeInPage {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--neon-red), var(--neon-cyan), transparent);
+    }
+
+    .card-winners {
+      border: 1px solid rgba(255, 215, 0, 0.25);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.1);
+    }
+
+    .card-winners::before {
+      background: linear-gradient(90deg, transparent, var(--neon-gold), var(--neon-green), transparent);
+    }
+
+    h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 20px;
+      background: linear-gradient(135deg, #fff, var(--neon-red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+    }
+
+    h3 { font-size: 16px; color: var(--neon-cyan); }
+    .title-gold { color: var(--neon-gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+
+    .form-group { margin-bottom: 15px; position: relative; }
+    
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .lock-indicator {
+      font-size: 11px;
+      color: var(--neon-green);
+      font-family: 'Orbitron', sans-serif;
+      display: none;
+      text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 15px;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(8, 12, 24, 0.85);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    input::placeholder { color: #64748b; font-weight: 500; }
+    input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+
+    input.locked-input {
+      background: rgba(0, 255, 102, 0.05);
+      border-color: rgba(0, 255, 102, 0.4);
+      color: var(--neon-green);
+      cursor: not-allowed;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 10px;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-proceed {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #64748b;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    .btn-proceed.ready-glow {
+      background: linear-gradient(135deg, #00f0ff, #0077ff);
+      color: #000;
+      cursor: pointer;
+      filter: none;
+      border: 1.5px solid #fff;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px #fff;
+      animation: lightningPulse 1.2s infinite alternate;
+    }
+
+    .btn-sub {
+      background: linear-gradient(135deg, #ff0055, #cc0033);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.7);
+      display: none;
+      animation: fadeInScale 0.4s ease forwards, redPulse 1.2s infinite alternate;
+    }
+
+    .btn-verify {
+      background: linear-gradient(135deg, #00f0ff, #00ff66);
+      color: #000;
+      box-shadow: 0 0 25px rgba(0, 255, 102, 0.7);
+      display: none;
+      animation: fadeInScale 0.4s ease forwards;
+    }
+
+    .btn-check {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 119, 255, 0.4));
+      border: 1.5px solid var(--neon-cyan);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+    .btn-check:hover {
+      background: linear-gradient(135deg, var(--neon-cyan), #0077ff);
+      color: #000;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+    }
+
+    .btn-claim-weekly {
+      background: linear-gradient(135deg, #00f0ff, #0077ff);
+      color: #000;
+      font-size: 13px;
+      display: none;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+      animation: lightningPulse 1.2s infinite alternate;
+      border: 1.5px solid #fff;
+      margin-top: 14px;
+    }
+
+    .btn-claim-monthly {
+      background: linear-gradient(135deg, #00ff66, #00b344);
+      color: #000;
+      font-size: 14px;
+      display: none;
+      box-shadow: 0 0 35px rgba(0, 255, 102, 0.95);
+      animation: lightningPulse 1s infinite alternate;
+      border: 1.5px solid #fff;
+      margin-top: 10px;
+    }
+
+    @keyframes lightningPulse {
+      0% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); transform: scale(1); }
+      100% { box-shadow: 0 0 35px rgba(0, 240, 255, 1), 0 0 10px #fff; transform: scale(1.02); }
+    }
+
+    @keyframes redPulse {
+      0% { box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
+      100% { box-shadow: 0 0 35px rgba(255, 0, 85, 0.9); }
+    }
+
+    @keyframes fadeInScale {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .user-locked-badge {
+      display: none;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      margin-bottom: 14px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .user-locked-badge span.edit-btn { color: var(--muted); cursor: pointer; font-size: 12px; text-decoration: underline; }
+
+    .share-box {
+      margin-top: 14px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      display: none;
+    }
+    .share-link-input {
+      font-size: 13px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
+    }
+    .share-actions { display: flex; gap: 8px; }
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      font-size: 11px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .btn-copy { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn-wa { background: #25d366; color: #000; font-weight: 800; }
+
+    .progress-box-card {
+      background: rgba(10, 15, 30, 0.95);
+      border: 1.5px solid rgba(0, 240, 255, 0.3);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 255, 0.15);
+    }
+
+    .progress-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .points-digit-box {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px var(--neon-cyan);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .points-digit-box span { font-size: 13px; color: var(--neon-cyan); font-weight: 700; }
+
+    .target-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon-green);
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .neon-tube {
+      background: #030712;
+      border-radius: 20px;
+      height: 26px;
+      width: 100%;
+      overflow: hidden;
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 240, 255, 0.25);
+      position: relative;
+      padding: 3px;
+    }
+
+    .neon-liquid-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #ff0055 0%, #00f0ff 50%, #00ff66 100%);
+      background-size: 250% 100%;
+      box-shadow: 0 0 25px rgba(0, 255, 102, 0.9), 0 0 10px rgba(0, 240, 255, 0.8);
+      transition: width 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      animation: plasmaSurge 2s infinite linear;
+    }
+
+    .neon-liquid-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+      animation: lightRush 1.5s infinite;
+      border-radius: 16px;
+    }
+
+    @keyframes plasmaSurge {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    @keyframes lightRush {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    .msg-box {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+      font-weight: 600;
+    }
+
+    .msg-success { background: rgba(0, 255, 102, 0.08); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.35); }
+    .msg-error { background: rgba(255, 0, 85, 0.08); color: #ff3366; border: 1px solid rgba(255, 0, 85, 0.35); }
+    .msg-info { background: rgba(0, 240, 255, 0.08); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.35); }
+
+    .winner-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 215, 0, 0.15);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .winner-name { font-weight: 700; color: #fff; font-size: 15px; }
+    .winner-code { font-size: 12px; color: var(--neon-cyan); margin-top: 2px; }
+    .winner-badge {
+      background: rgba(255, 215, 0, 0.15);
+      color: var(--neon-gold);
+      border: 1px solid var(--neon-gold);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 11px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .custom-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #0f172a;
+      border: 1px solid var(--neon-red);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.5);
+      z-index: 9999;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .custom-toast.show { transform: translateX(-50%) translateY(0); }
+
+    .admin-bar { margin-top: 15px; text-align: center; }
+    .btn-admin-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px dashed rgba(0, 240, 255, 0.4);
+      color: var(--neon-cyan);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      width: 100%;
+      max-width: 550px;
+      border-radius: 18px;
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+      padding: 24px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px; right: 18px;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+    th, td { border: 1px solid rgba(255, 255, 255, 0.1); padding: 9px 8px; text-align: left; }
+    th { background: rgba(0, 0, 0, 0.6); color: var(--muted); font-family: 'Orbitron', sans-serif; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<!-- Background Video Layer -->
+<div class="bg-video-wrapper">
+  <video autoplay loop muted playsinline id="bgVideo">
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+</div>
+<div class="bg-overlay"></div>
+
+<div id="toastBox" class="custom-toast">
+  <span id="toastIcon">⚠️</span>
+  <span id="toastMsg">Notification</span>
+</div>
+
+<div class="container">
+
+  <!-- TOP NAVIGATION BUTTONS -->
+  <div class="nav-tabs">
+    <button class="nav-btn active" id="tabEarnBtn" onclick="switchTab('earn')">
+      ⚡ Subscribe & Earn
+    </button>
+    <button class="nav-btn" id="tabPointsBtn" onclick="switchTab('points')">
+      💎 Check My Points
+    </button>
+  </div>
+
+  <!-- ================= PAGE 1: SUBSCRIBE & EARN ================= -->
+  <div id="pageEarn" class="tab-page active-page">
+    <div class="card">
+      <h2>⚡ CK GAMING REWARDS ⚡</h2>
+
+      <!-- STEP 1: Inputs with Dynamic Validation -->
+      <div id="step1Box">
+        <div class="form-group">
+          <label>Enter Your YouTube Username</label>
+          <input type="text" id="userHandle" placeholder="e.g. @username" oninput="validateInputFlow()" required>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Referred By Code</span>
+            <span id="lockBadge" class="lock-indicator">🔒 LOCKED</span>
+          </label>
+          <input type="text" id="refByCode" placeholder="REF-xxx (Optional)">
+        </div>
+
+        <!-- Glowing Lightning Proceed Button -->
+        <button id="btnProceed" class="btn btn-proceed" onclick="proceedToSubscribe()">
+          CONTINUE TO STEP 1 ➔
+        </button>
+      </div>
+
+      <!-- Active User Indicator -->
+      <div id="userBadge" class="user-locked-badge">
+        <span id="lockedHandleText">@user</span>
+        <span class="edit-btn" onclick="editUsername()">Change</span>
+      </div>
+
+      <!-- STEP 2: Subscribe Channel -->
+      <a id="btnSubscribe" class="btn btn-sub" href="https://youtube.com/@ckgeming-f2m?sub_confirmation=1" target="_blank" onclick="onSubscribeClick()">
+        ▶ 1. SUBSCRIBE CHANNEL
+      </a>
+
+      <!-- STEP 3: Verify Subscription -->
+      <button id="btnVerify" class="btn btn-verify" onclick="verifySubscription()">
+        ✓ 2. VERIFY SUBSCRIPTION
+      </button>
+
+      <div id="subStatus" class="msg-box"></div>
+
+      <!-- Auto-Generated 1-Click Share Box -->
+      <div id="shareBox" class="share-box">
+        <label style="font-size:11px; color:#94a3b8;">Your Direct Referral Link:</label>
+        <input type="text" id="directShareLink" class="share-link-input" readonly>
+        <div class="share-actions">
+          <button class="btn-action btn-copy" onclick="copyReferralLink()">📋 Copy Link</button>
+          <a id="btnShareWhatsApp" class="btn-action btn-wa" href="#" target="_blank">📲 WhatsApp Share</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: CHECK MY POINTS & CLAIM ================= -->
+  <div id="pagePoints" class="tab-page">
+    <div class="card">
+      <h3>💎 My Rewards & Referrals</h3>
+
+      <div class="form-group">
+        <label>Enter Referral Code OR YouTube Username</label>
+        <input type="text" id="searchQuery" placeholder="e.g. REF-CK123 or @username">
+      </div>
+      <button class="btn btn-check" onclick="checkPointsUniversal()">CHECK MY POINTS</button>
+
+      <div id="pointsCard" class="msg-box"></div>
+
+      <!-- Massive Neon Energy Tube -->
+      <div class="progress-box-card" id="progBoxCard">
+        <div class="progress-meta-row">
+          <div class="points-digit-box">
+            <span style="font-size:12px; color:#94a3b8; text-transform:uppercase;">Energy:</span>
+            <span id="digitCounter">0</span>
+            <span>/ 100 PTS</span>
+          </div>
+          <div class="target-badge" id="percentBadge">0% READY</div>
+        </div>
+        
+        <div class="neon-tube">
+          <div class="neon-liquid-fill" id="liquidFill"></div>
+        </div>
+      </div>
+
+      <!-- 2-Tier Claim Options -->
+      <button id="btnClaimWeekly" class="btn btn-claim-weekly" onclick="openClaimModal('weekly')">
+        💎 CLAIM WEEKLY MEMBERSHIP (60 PTS COMPLETED)
+      </button>
+
+      <button id="btnClaimMonthly" class="btn btn-claim-monthly" onclick="openClaimModal('monthly')">
+        👑 CLAIM MONTHLY MEMBERSHIP (100 PTS COMPLETED)
+      </button>
+    </div>
+  </div>
+
+  <!-- PUBLIC LIVE WINNERS BOARD -->
+  <div class="card card-winners">
+    <h3 class="title-gold">🏆 HALL OF FAME / WINNERS 🏆</h3>
+    <div id="publicWinnersList"></div>
+  </div>
+
+  <!-- Admin Panel Trigger -->
+  <div class="admin-bar">
+    <div class="btn-admin-open" onclick="openAdminModal()">
+      🔒 ADMIN CONTROL PANEL
+    </div>
+  </div>
+
+</div>
+
+<!-- Free Fire UID Modal -->
+<div class="modal-overlay" id="uidModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeClaimModal()">✕</span>
+    <h3 id="claimModalTitle" style="text-align:left;">CLAIM YOUR REWARD</h3>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:15px;">
+      Enter your Free Fire UID to receive your membership directly:
+    </p>
+    
+    <div class="form-group">
+      <label>Free Fire Player UID</label>
+      <input type="text" id="ffPlayerUid" placeholder="Enter numeric UID (e.g. 1234567890)">
+    </div>
+
+    <button class="btn btn-proceed ready-glow" onclick="submitClaimWithUid()">
+      🚀 SUBMIT & CLAIM VIA WHATSAPP
+    </button>
+  </div>
+</div>
+
+<!-- Admin Modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeAdminModal()">✕</span>
+    <h3 style="text-align:left;">Admin Control Portal</h3>
+    
+    <div id="adminLogin">
+      <div class="form-group" style="margin-top:15px;">
+        <label>Admin Password</label>
+        <input type="password" id="adminPass" placeholder="Enter password">
+      </div>
+      <button class="btn btn-check" onclick="verifyAdmin()">Login</button>
+    </div>
+
+    <div id="adminDashboard" style="display:none; margin-top:15px;">
+      <h4 style="color:var(--neon-green); font-size:13px; text-transform:uppercase; margin-bottom:8px;">
+        👥 All Registered Users & Live Points
+      </h4>
+      <table>
+        <thead>
+          <tr>
+            <th>User Handle</th>
+            <th>Ref Code</th>
+            <th>Points</th>
+            <th>Status / UID</th>
+            <th>Wins</th>
+          </tr>
+        </thead>
+        <tbody id="adminUsersTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const MY_WHATSAPP_NUMBER = "94742870409";
+  const ADMIN_PASSWORD = "CK 2004";
+  const BACKEND_API = "https://Feros2342-ck-gaming-rewards.hf.space/api";
+
+  let currentActiveCode = "";
+  let currentActiveHandle = "";
+  let selectedRewardType = "";
+
+  function showToast(text, isError = true) {
+    const toast = document.getElementById("toastBox");
+    const msg = document.getElementById("toastMsg");
+    const icon = document.getElementById("toastIcon");
+
+    msg.innerText = text;
+    icon.innerText = isError ? "⚠️" : "✅";
+    toast.style.borderColor = isError ? "var(--neon-red)" : "var(--neon-green)";
+    toast.style.boxShadow = isError ? "0 0 25px rgba(255, 0, 85, 0.6)" : "0 0 25px rgba(0, 255, 102, 0.6)";
+
+    toast.classList.add("show");
+    setTimeout(() => { toast.classList.remove("show"); }, 4000);
+  }
+
+  // --- TAB NAVIGATION ENGINE ---
+  function switchTab(tab) {
+    const earnPage = document.getElementById("pageEarn");
+    const pointsPage = document.getElementById("pagePoints");
+    const tabEarnBtn = document.getElementById("tabEarnBtn");
+    const tabPointsBtn = document.getElementById("tabPointsBtn");
+
+    if (tab === 'earn') {
+      earnPage.classList.add("active-page");
+      pointsPage.classList.remove("active-page");
+      tabEarnBtn.classList.add("active");
+      tabPointsBtn.classList.remove("active");
+    } else {
+      pointsPage.classList.add("active-page");
+      earnPage.classList.remove("active-page");
+      tabPointsBtn.classList.add("active");
+      tabEarnBtn.classList.remove("active");
+    }
+  }
+
+  // --- Auto-Lock Referral Code from Link ---
+  window.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refParam = urlParams.get("ref");
+    const refInput = document.getElementById("refByCode");
+    const lockBadge = document.getElementById("lockBadge");
+
+    if (refParam && refParam.trim().length > 3) {
+      refInput.value = refParam.trim().toUpperCase();
+      refInput.readOnly = true;
+      refInput.classList.add("locked-input");
+      lockBadge.style.display = "inline";
+      showToast(`Referral Code ${refParam.toUpperCase()} Locked!`, false);
+    }
+
+    validateInputFlow();
+    loadPublicWinners();
+  });
+
+  // --- Dynamic Input Validation ---
+  function validateInputFlow() {
+    const handle = document.getElementById("userHandle").value.trim();
+    const btn = document.getElementById("btnProceed");
+    if (handle.length >= 3) {
+      btn.classList.add("ready-glow");
+      btn.style.pointerEvents = "auto";
+    } else {
+      btn.classList.remove("ready-glow");
+      btn.style.pointerEvents = "none";
+    }
+  }
+
+  // --- STEP 1: Proceed to Subscribe ---
+  function proceedToSubscribe() {
+    const handle = document.getElementById("userHandle").value.trim();
+    if (!handle || handle.length < 3) {
+      showToast("Please enter a valid YouTube username!");
+      return;
+    }
+    document.getElementById("step1Box").style.display = "none";
+    document.getElementById("userBadge").style.display = "flex";
+    document.getElementById("lockedHandleText").innerText = handle.startsWith("@") ? handle : `@${handle}`;
+    document.getElementById("btnSubscribe").style.display = "flex";
+    showToast("Now tap 'Subscribe Channel' to continue!", false);
+  }
+
+  function editUsername() {
+    document.getElementById("step1Box").style.display = "block";
+    document.getElementById("userBadge").style.display = "none";
+    document.getElementById("btnSubscribe").style.display = "none";
+    document.getElementById("btnVerify").style.display = "none";
+    document.getElementById("subStatus").style.display = "none";
+    validateInputFlow();
+  }
+
+  // --- STEP 2: Subscribe Click & Baseline Ping ---
+  async function onSubscribeClick() {
+    fetch(`${BACKEND_API}/ping_subscribe`).catch(() => {});
+    showBox("subStatus", "YouTube opened. Please subscribe to CK GAMING, then click 'Verify Subscription'.", "msg-info");
+    showToast("Subscribe to CK GAMING to earn your points!", false);
+    setTimeout(() => {
+      document.getElementById("btnVerify").style.display = "flex";
+    }, 1000);
+  }
+
+  // --- STEP 3: Verify Subscription Function ---
+  async function verifySubscription() {
+    const handle = document.getElementById("userHandle").value.trim().toLowerCase();
+    const refBy = document.getElementById("refByCode").value.trim().toUpperCase();
+    const btn = document.getElementById("btnVerify");
+
+    if (!handle) {
+      showToast("Please enter your YouTube username!");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Verifying with YouTube API...";
+
+    try {
+      const response = await fetch(`${BACKEND_API}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_handle: handle, referral_by: refBy })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const refCode = data.your_referral_code;
+
+        // Auto-Generate Shareable Referral Link
+        const baseSiteUrl = window.location.origin + window.location.pathname;
+        const fullShareUrl = `${baseSiteUrl}?ref=${refCode}`;
+        document.getElementById("directShareLink").value = fullShareUrl;
+        
+        const waShareMsg = encodeURIComponent(`🎮 Join CK GAMING Loot Hub! Subscribe & win Free Fire Weekly/Monthly Memberships! Use my referral link: ${fullShareUrl}`);
+        document.getElementById("btnShareWhatsApp").href = `https://wa.me/?text=${waShareMsg}`;
+        document.getElementById("shareBox").style.display = "block";
+
+        if (data.status === "already_subscribed") {
+          showToast(data.message, false);
+          showBox("subStatus", `ℹ️ ${data.message}<br>Your Referral Code: <b style="color:var(--neon-cyan); font-size:16px;">${refCode}</b>`, "msg-info");
+        } else {
+          showToast("🎉 Subscription Confirmed! +1 Point added.", false);
+          showBox("subStatus", `🎉 SUCCESS! Subscription Confirmed.<br>
+            You gained <b>+1 Point</b>.<br>
+            Your Referral Code: <b style="color:var(--neon-cyan); font-size:16px;">${refCode}</b><br>
+            Share your link below to reach 60 & 100 points!`, "msg-success");
+        }
+
+        btn.innerText = "✓ Verified";
+        document.getElementById("searchQuery").value = refCode;
+      } else {
+        showToast(data.message, true);
+        showBox("subStatus", `❌ ${data.message}`, "msg-error");
+        btn.innerText = "✓ 2. VERIFY SUBSCRIPTION";
+      }
+    } catch (e) {
+      showToast("Server connection error! Please ensure Hugging Face Space is online.", true);
+      btn.innerText = "✓ 2. VERIFY SUBSCRIPTION";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function copyReferralLink() {
+    const copyInput = document.getElementById("directShareLink");
+    copyInput.select();
+    navigator.clipboard.writeText(copyInput.value);
+    showToast("📋 Referral Link Copied to Clipboard!", false);
+  }
+
+  // --- UNIVERSAL POINTS CHECK (By Ref Code OR Username) ---
+  async function checkPointsUniversal() {
+    const query = document.getElementById("searchQuery").value.trim();
+    const btnWeekly = document.getElementById("btnClaimWeekly");
+    const btnMonthly = document.getElementById("btnClaimMonthly");
+    const progBox = document.getElementById("progBoxCard");
+    const liquidFill = document.getElementById("liquidFill");
+    const digitCounter = document.getElementById("digitCounter");
+    const percentBadge = document.getElementById("percentBadge");
+
+    btnWeekly.style.display = "none";
+    btnMonthly.style.display = "none";
+
+    if (!query) {
+      showToast("Please enter your Referral Code or YouTube Username!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_API}/points?code=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      if (data.success) {
+        currentActiveCode = data.referral_code || query.toUpperCase();
+        currentActiveHandle = data.user_handle;
+        const target = 100;
+        const finalPoints = data.points;
+        const percent = Math.min((finalPoints / target) * 100, 100);
+
+        let msg = `Player: <b>${data.user_handle}</b> (Code: <b>${currentActiveCode}</b>)<br>
+                   Total Referrals: <b>${data.referrals}</b> friends joined<br>
+                   Gifts Won So Far: <b>${data.wins || 0}</b>`;
+        
+        showBox("pointsCard", msg, "msg-info");
+
+        progBox.style.display = "block";
+        liquidFill.style.width = "0%";
+
+        let currentCount = 0;
+        const steps = 30;
+        const increment = finalPoints / steps;
+        const counterTimer = setInterval(() => {
+          currentCount += increment;
+          if (currentCount >= finalPoints) {
+            digitCounter.innerText = finalPoints;
+            percentBadge.innerText = `${percent.toFixed(0)}% READY`;
+            clearInterval(counterTimer);
+          } else {
+            digitCounter.innerText = Math.floor(currentCount);
+            percentBadge.innerText = `${Math.floor((currentCount / target) * 100)}%`;
+          }
+        }, 30);
+
+        setTimeout(() => { liquidFill.style.width = `${percent}%`; }, 80);
+
+        if (finalPoints >= 60 && finalPoints < 100) {
+          btnWeekly.style.display = "flex";
+        } else if (finalPoints >= 100) {
+          btnWeekly.style.display = "flex";
+          btnMonthly.style.display = "flex";
+        }
+      } else {
+        showToast("No records found for this Code or Username!", true);
+        showBox("pointsCard", "Account not found! Please make sure you have subscribed and verified first.", "msg-error");
+        progBox.style.display = "none";
+      }
+    } catch (e) {
+      showToast("Failed to fetch points from server.", true);
+    }
+  }
+
+  // --- Free Fire UID Modal Logic ---
+  function openClaimModal(rewardType) {
+    selectedRewardType = rewardType;
+    document.getElementById("claimModalTitle").innerText = `CLAIM ${rewardType.toUpperCase()} MEMBERSHIP`;
+    document.getElementById("ffPlayerUid").value = "";
+    document.getElementById("uidModal").style.display = "flex";
+  }
+
+  function closeClaimModal() {
+    document.getElementById("uidModal").style.display = "none";
+  }
+
+  async function submitClaimWithUid() {
+    const ffUid = document.getElementById("ffPlayerUid").value.trim();
+    if (!ffUid || ffUid.length < 5) {
+      showToast("Please enter a valid Free Fire numeric UID!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_API}/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referral_code: currentActiveCode,
+          reward_type: selectedRewardType,
+          ff_uid: ffUid
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        closeClaimModal();
+        showToast(`🎁 ${selectedRewardType.toUpperCase()} claimed! Forwarding to WhatsApp...`, false);
+
+        const waMsg = encodeURIComponent(`Hello CK GAMING!
+My Referral Code: ${currentActiveCode} (${currentActiveHandle})
+Reward Claimed: ${selectedRewardType.toUpperCase()} MEMBERSHIP
+My Free Fire UID: ${ffUid}
+Please verify and credit my reward!`);
+
+        window.open(`https://wa.me/${MY_WHATSAPP_NUMBER}?text=${waMsg}`, "_blank");
+
+        loadPublicWinners();
+        setTimeout(() => { checkPointsUniversal(); }, 1500);
+      } else {
+        showToast(data.message, true);
+      }
+    } catch (e) {
+      showToast("Failed to claim reward. Please try again.");
+    }
+  }
+
+  // --- Public Winners Board ---
+  async function loadPublicWinners() {
+    const container = document.getElementById("publicWinnersList");
+    try {
+      const res = await fetch(`${BACKEND_API}/winners`);
+      const data = await res.json();
+      const winners = data.winners || [];
+
+      if (winners.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--muted); font-size:14px; padding:15px;">
+          🎮 No winners yet! Reach 60 pts (Weekly) or 100 pts (Monthly) to win!
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      winners.forEach(w => {
+        const item = document.createElement("div");
+        item.className = "winner-item";
+        item.innerHTML = `
+          <div>
+            <div class="winner-name">👑 ${w.handle}</div>
+            <div class="winner-code">Code: ${w.code} • ${w.claim_time}</div>
+          </div>
+          <div class="winner-badge">🎁 ${w.status || 'Winner'}</div>
+        `;
+        container.appendChild(item);
+      });
+    } catch(e) {
+      container.innerHTML = `<div style="text-align:center; color:var(--muted); font-size:13px; padding:10px;">Connecting to leaderboard...</div>`;
+    }
+  }
+
+  // --- Admin Modal Functions ---
+  function openAdminModal() { document.getElementById("adminModal").style.display = "flex"; }
+  function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
+
+  async function verifyAdmin() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass !== ADMIN_PASSWORD) {
+      showToast("Incorrect Admin Password!");
+      return;
+    }
+    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById("adminDashboard").style.display = "block";
+
+    try {
+      const res = await fetch(`${BACKEND_API}/admin/all_users?password=${encodeURIComponent(pass)}`);
+      const data = await res.json();
+      const tbody = document.getElementById("adminUsersTableBody");
+      tbody.innerHTML = "";
+
+      if (!data.users || data.users.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#94a3b8;'>No registered users yet.</td></tr>";
+        return;
+      }
+
+      data.users.forEach(u => {
+        const row = `<tr>
+          <td><b>${u.handle}</b></td>
+          <td style="color:var(--neon-cyan);">${u.code}</td>
+          <td style="color:var(--neon-green); font-weight:800; font-size:13px;">${u.points} pts</td>
+          <td style="font-size:11px; color:#cbd5e1;">${u.status || '-'}</td>
+          <td style="color:var(--neon-gold); font-weight:bold;">${u.wins}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    } catch(e) {
+      showToast("Error loading admin user records.");
+    }
+  }
+
+  function showBox(id, html, className) {
+    const box = document.getElementById(id);
+    box.style.display = "block";
+    box.className = `msg-box ${className}`;
+    box.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
